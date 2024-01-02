@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from shop.models import *
+from shop.models import Category,Products
 from django.contrib import messages
 
 
@@ -19,7 +19,7 @@ def collections(request):
 def collectionsview(request,name):
     if(Category.objects.filter(name=name,status=0)):
         products= Products.objects.filter(category__name=name)
-        return render(request,'shop/products/index.html',{"products":products,"category__name":name})
+        return render(request,'shop/products/index.html',{"products":products,"category":name})
     
     else:
         messages.warning(request,"No such Category Found")
