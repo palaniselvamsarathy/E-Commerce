@@ -7,8 +7,25 @@ Shopkart | Online Shopping
     <div class="container" style="margin-top: 70px;">
         <div class="row">
             <div class="col-12">
-                <h1>Home PAge</h1>
+                <h1>Latest Offers</h1>
             </div>
+            {% for item in products %}
+                <div class="col-lg-3 col-md-4">
+                    <div class="card my-3 dis-img">
+                        <img src="{{item.product_image.url}}" alt="Category Image" class="card-image-top display">
+                        
+                        <a href="{% url 'product_details' item.category.name item.name %}">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">{{item.name}}</h5>
+                                <p class="card-text">
+                                    <span class="old-price float-start"><s>Rs. {{item.original_price | stringformat:'d'}}</s></span>
+                                    <span class="new-price float-end ">Rs. {{item.selling_price | stringformat:'d'}}</span>
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
         </div>
         
     </div>

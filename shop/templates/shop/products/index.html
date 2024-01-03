@@ -10,14 +10,15 @@ Shopkart | Online Shopping
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <h4 class="mb-4">Awesome Products</h4>
+                <h4 class="mb-4">{{category_name}} Products</h4>
                 <hr>
             </div>
             {% for item in products %}
             <div class="col-lg-3 col-md-4">
                 <div class="card my-3">
-                    <img src="{{ item.product_image.url }}" alt="Category Image" class="card-image-top display">
-                    <a href="#">
+                    <img src="{{item.product_image.url}}" alt="Category Image" class="card-image-top display">
+                    
+                    <a href="{% url 'product_details' category_name item.name %}">
                         <div class="card-body">
                             <h5 class="card-title text-primary">{{item.name}}</h5>
                             <p class="card-text">
