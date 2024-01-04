@@ -1,9 +1,10 @@
 from django.shortcuts import render,redirect
-from shop.models import Category,Products
+from shop.models import Category,Products,Cart,Favourite
 from django.contrib import messages
-# from django.http import JsonResponse
+from django.http import JsonResponse
 from shop.forms import CustomUserForm
 from django.contrib.auth import login,authenticate,logout
+import json
 
 # Create your views here.
 def home(request):
@@ -71,3 +72,66 @@ def product_details(request,cname,pname):
     else:
       messages.error(request,"No Such Catagory Found")
       return redirect('collections')
+    
+def add_to_cart(request):
+   if request.headers.get('x-requested-with')=='XMLHttpRequest':
+    if request.user.is_authenticated:
+      data=json.load(request)
+      product_qty=data['product_qty']
+      product_id=data['pid']
+      #print(request.user.id)
+      product_status=Products.objects.get(id=product_id)
+      if product_status:
+        if Cart.objects.filter(user=request.user.id,product_id=product_id):
+          return JsonResponse({'status':'Product Already in Cart'}, status=200)
+        else:
+          if product_status.quantity>=product_qty:
+            Cart.objects.create(user=request.user,product_id=product_id,product_qty=product_qty)
+            return JsonResponse({'status':'Product Added to Cart'}, status=200)
+          else:
+            return JsonResponse({'status':'Product Stock Not Available'}, status=200)
+    else:
+      return JsonResponse({'status':'Login to Add Cart'}, status=200)
+   else:
+    return JsonResponse({'status':'Invalid Access'}, status=200)
+   
+def cart_page(request):
+   if request.user.is_authenticated:
+      cart = Cart.objects.filter(user=request.user)
+      return render(request,"shop/cart.html",{"cart":cart})
+   else:
+      return redirect("/")
+   
+def remove_cart(request,cid):
+  cartitem=Cart.objects.get(id=cid)
+  cartitem.delete()
+  return redirect("/cart/")
+
+def fav_page(request):
+   if request.headers.get('x-requested-with')=='XMLHttpRequest':
+    if request.user.is_authenticated:
+      data=json.load(request)
+      product_id=data['pid']
+      product_status=Products.objects.get(id=product_id)
+      if product_status:
+         if Favourite.objects.filter(user=request.user.id,product_id=product_id):
+          return JsonResponse({'status':'Product Already in Favourite'}, status=200)
+         else:
+          Favourite.objects.create(user=request.user,product_id=product_id)
+          return JsonResponse({'status':'Product Added to Favourite'}, status=200)
+    else:
+      return JsonResponse({'status':'Login to Add Favourite'}, status=200)
+   else:
+    return JsonResponse({'status':'Invalid Access'}, status=200)
+   
+def favviewpage(request):
+   if request.user.is_authenticated:
+      fav = Favourite.objects.filter(user = request.user)
+      return render(request,'shop/fav.html',{"fav":fav})
+   else:
+      return redirect("/")
+   
+def remove_fav(request,fid):
+    item=Favourite.objects.get(id=fid)
+    item.delete()
+    return redirect("/favviewpage")
